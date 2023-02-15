@@ -1,28 +1,57 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app" class="gradiante">
+      <HeaderComponent />   
+      <div class="row main">
+        <div class="info col-10 col-md-5 col-lg-3 m-3">
+            <PesoComponent />
+        </div>
+        <div class="info col-10 col-md-5 col-lg-7 m-3">
+          <TicketComponent/>
+        </div>
+      </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import HeaderComponent from './components/HeaderComponent.vue';
+import PesoComponent from './components/PesoComponent.vue';
+import TicketComponent from './components/TicketComponent.vue';
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
+        components: {
+    HeaderComponent,
+    PesoComponent,
+    TicketComponent
+
 }
+  }      
 </script>
 
+
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+  *{
+    font-family: 'Titillium Web', sans-serif;
+  }
+  
+  .gradiante{
+    padding: 0px;
+    margin:0px;
+    height: 100vh;
+    width: 100%;
+
+    background: #2980B9;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to bottom, #FFFFFF, #6DD5FA, #2980B9);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to bottom, #FFFFFF, #6DD5FA, #2980B9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  }
+  .main{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    height: calc(100vh - 80px);
+  }
+  .info{
+    padding: 20px;
+    background-color:aliceblue;
+    box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+    height: calc(100vh - 120px);
+  }
 </style>
