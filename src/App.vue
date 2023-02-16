@@ -20,7 +20,8 @@ export default {
         components: {
     HeaderComponent,
     PesoComponent,
-    TicketComponent
+    TicketComponent,
+
 
 }
   }      
