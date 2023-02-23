@@ -115,28 +115,28 @@
                         <hr class="m-1">
                         <div class="col-12 col-md-5 m-0">
                             <label for="origen" class="form-label">Origen</label>
-                            <input ref="origen" v-model="ticket.origen" type="text" class="form-control" id="origen" value="">
+                            <input ref="origen" @blur="validaCampo(1)" v-model="ticket.origen" type="text" class="form-control" id="origen" value="">
                         </div>
                         <div class="col-12 col-md-5 m-0">
                             <label for="destino" class="form-label">Destino</label>
-                            <input v-model="ticket.destino" type="text" class="form-control" id="destino" value="">
+                            <input ref="destino" @blur="validaCampo(2)" v-model="ticket.destino" type="text" class="form-control" id="destino" value="">
                         </div>
                         <div class="col-12 col-md-2 m-0">
                             <label for="producto" class="form-label">Producto</label>
-                            <input v-model="ticket.producto" type="text" class="form-control" id="producto" value="">
+                            <input ref="producto" @blur="validaCampo(3)" v-model="ticket.producto" type="text" class="form-control" id="producto" value="">
                         </div>
                         <hr class="m-2">
                         <div class="col-12 col-md-3 m-0">
                             <label for="chasis" class="form-label">Dominio Chasis</label>
-                            <input v-model="ticket.chasis" type="text" class="form-control" id="chasis" value="">
+                            <input ref="chasis" @blur="validaCampo(4)" v-model="ticket.chasis" type="text" class="form-control" id="chasis" value="" placeholder="ej.: AA999AA o AAA999">
                         </div>
                         <div class="col-12 col-md-3 m-0">
                             <label for="acoplado" class="form-label">Dominio Acoplado</label>
-                            <input v-model="ticket.acoplado" type="text" class="form-control" id="acoplado" value="">
+                            <input ref="acoplado" @blur="validaCampo(5)" v-model="ticket.acoplado" type="text" class="form-control" id="acoplado" value="" placeholder="ej.: AA999AA o AAA999">
                         </div>
                         <div class="col-12 col-md-6 m-0">
-                            <label for="chefer" class="form-label">Chofer/Transporte</label>
-                            <input v-model="ticket.chofer" type="text" class="form-control" id="chofer" value="">
+                            <label for="chofer" class="form-label">Chofer/Transporte</label>
+                            <input ref="chofer" @blur="validaCampo(6)" v-model="ticket.chofer" type="text" class="form-control" id="chofer" value="">
                         </div>
                         <hr>
                         <div class="d-grid gap-2 d-md-flex justify-content-md-center m-0">
@@ -212,7 +212,8 @@ export default {
             listaproducto:Object,
             estadoBruto:1,
             estadoTara:1,
-            errores:[]
+            errores:[],
+            letrasDominio:0
         }
     },    
     created(){
@@ -228,6 +229,12 @@ export default {
             this.estadoTara=1
             this.estadoBruto=3
         }
+        this.$vToastify.setSettings({
+                            position:"top-center",
+                            errorDuration:2000,
+                            hideProgressbar:true,
+                            theme:"dark",
+                        })
     },
     updated(){
         console.log(this.getPeso().tb)
@@ -246,12 +253,111 @@ export default {
         ...mapGetters('pesoModule',['getPeso']),
         ...mapMutations(['setEstado','setTitulo','setModo']),
         ...mapMutations('pesoModule',['setPeso']),
-        guardarEimprimir(){
-            const URLPlugin = "http://192.168.100.106:8000"/* "http://localhost:8000" */
-            const nombreImpresora ="EPSON TM-T20II Receipt" /* $listaDeImpresoras.value; */
-            this.imprimir(nombreImpresora, URLPlugin)
+        validaCampo(campo){
+            let valorCampo=""
+            switch(campo){
+                case 1:{
+                    if(!this.ticket.origen){
+                        this.$nextTick(() => {
+                            this.$refs.origen.focus(); 
+                            document.getElementById("origen").select()
+                        });
+                        this.$vToastify.error("Ups! el Origen no puede estar vacio!")
+                    }else{
+                    valorCampo=this.ticket.origen.toUpperCase()
+                    this.ticket.origen=valorCampo
+                    }
+                    break
+                }
+                case 2:{
+                    if(!this.ticket.destino){
+                        this.$nextTick(() => {
+                            this.$refs.destino.focus(); 
+                            document.getElementById("destino").select()
+                        });
+                        this.$vToastify.error("Ups! el Destino no puede estar vacio!")
+                    }else{
+                    valorCampo=this.ticket.destino.toUpperCase()
+                    this.ticket.destino=valorCampo
+                    }
+                    break
+                }
+                case 3:{
+                    if(!this.ticket.producto){
+                        this.$nextTick(() => {
+                            this.$refs.producto.focus(); 
+                            document.getElementById("producto").select()
+                        });
+                        this.$vToastify.error("Ups! Debe haber un producto!")
+                    }else{
+                    valorCampo=this.ticket.producto.toUpperCase()
+                    this.ticket.producto=valorCampo
+                    }
+                    break
+                }
+                case 4:{
+                    if(!this.ticket.chasis){
+                        this.$nextTick(() => {
+                            this.$refs.chasis.focus(); 
+                            document.getElementById("chasis").select()
+                        });
+                        this.$vToastify.error("Ups! El dominio del Chasis no puede estar vacio!")
+                    }else{
+                        if (this.ticket.chasis.length<6 || this.ticket.chasis.length>7){
+                            this.$nextTick(() => {
+                            this.$refs.chasis.focus(); 
+                            document.getElementById("chasis").select()
+                        });
+                        this.$vToastify.error("Ups! el formato del dominio es incorrecto")
+                        }else{
+                            this.sacoespacios("C")
+                        }
+                    }    
+                    break
+                }
+                case 5:{
+                    if(!this.ticket.acoplado){
+                        this.$vToastify.warning("Ojo Falta el dominio del acoplado")
+                        this.sacoespacios("A")
+                        break
+                    }else{
+                        if (this.ticket.acoplado.length<6 || this.ticket.acoplado.length>9){
+                                this.$nextTick(() => {
+                                this.$refs.acoplado.focus(); 
+                                document.getElementById("acoplado").select()
+                            });
+                            this.$vToastify.error("Ups! el formato del dominio es incorrecto")
+                        }else{
+                            this.sacoespacios("A")
+                        }     
+                        break
+                    }  
+                }
+                case 6:{
+                    if(!this.ticket.chofer){
+                        this.$nextTick(() => {
+                            this.$refs.chofer.focus(); 
+                            document.getElementById("chofer").select()
+                        });
+                        this.$vToastify.error("Ups! el chofer no puede estar vacio!")
+                    }else{
+                        valorCampo=this.ticket.chofer.toUpperCase()
+                        this.ticket.chofer=valorCampo
+                    }
+                    break
+                }
+            }
         },
-
+        sacoespacios(valor){
+            let modificado=""
+            if (valor=='C'){
+                modificado=this.ticket.chasis.replace(/\s+/g, '')
+                this.ticket.chasis=modificado.toUpperCase()
+            }else{
+                modificado=this.ticket.acoplado.replace(/\s+/g, '')
+                this.ticket.acoplado=modificado.toUpperCase()
+            }
+        },
         cambiaEstadoBoton(boton,valor){
             if(boton=='B'){
                 this.estadoBruto=valor
@@ -339,38 +445,14 @@ export default {
         btnCancelar(){
             this.$emit('enviar',false)
         },
-    },
-    computed: {
-        showErrors() {
-            let formErrores=this.errores.join(" <---> ");
-            return formErrores;
-        },
-        checkModo(){
-            return this.getModo()
-        },
-        
-        validaPesoBruto()
-        {
-            if (parseInt(this.ticket.bruto.peso)>parseInt(this.ticket.tara.peso) 
-                && parseInt(this.ticket.bruto.peso)>=1000)
-            {
-                return 1
-            }else{
-                return 0
-            } 
-        },
-        validaPesoTara()
-        {
-            if (parseInt(this.ticket.tara.peso)<parseInt(this.ticket.bruto.peso) 
-                && parseInt(this.ticket.tara.peso)>=1000)
-            {
-                return 1
-            }else{
-                return 0
-            } 
+
+        guardarEimprimir(){
+            const URLPlugin = "http://localhost:8000"
+            const nombreImpresora ="EPSON TM-T20II Receipt" /* $listaDeImpresoras.value; */
+            this.imprimirTicket(nombreImpresora, URLPlugin,this.ticket)
         },
 
-        imprimir:async(nombreImpresora, URLPlugin)=> {
+        imprimirTicket:async(nombreImpresora, URLPlugin, data)=> {
             const conector = new ConectorPluginV3(URLPlugin);
             conector.Iniciar();
             conector.Feed(8);
@@ -396,17 +478,17 @@ export default {
             conector.EscribirTexto("------------------------------------------------\n");
             conector.EscribirTexto("Origen:\n");
             conector.EstablecerTamFuente(1, 2);
-            conector.EscribirTexto("Mezzadra Sergio\n");
+            conector.EscribirTexto(data.origen+"\n");
             conector.EstablecerTamFuente(1, 1);
             conector.EscribirTexto("------------------------------------------------\n");
             conector.EscribirTexto("Destino:\n");
             conector.EstablecerTamFuente(1, 2);
-            conector.EscribirTexto("Bugia Gabriel\n");
+            conector.EscribirTexto(data.destino+"\n");
             conector.EstablecerTamFuente(1, 1);
             conector.EscribirTexto("------------------------------------------------\n");
             conector.EscribirTexto("Producto:\n");
             conector.EstablecerTamFuente(1, 2);
-            conector.EscribirTexto("Soja\n");
+            conector.EscribirTexto(data.producto+"\n");
             conector.EstablecerTamFuente(1, 1);
             conector.EscribirTexto("------------------------------------------------\n");
             conector.EstablecerTamFuente(2, 1);
@@ -416,13 +498,13 @@ export default {
             conector.EstablecerAlineacion(ConectorPluginV3.ALINEACION_IZQUIERDA)
             conector.EscribirTexto("------------------------------------------------\n\n");
             conector.EstablecerTamFuente(1, 1);
-            conector.EscribirTexto("Bruto.....: 45.000kg 07/02/2023 - 10:38 AUT.(01)");
+            conector.EscribirTexto("Bruto.....: "+data.bruto.peso+"kg 07/02/2023 - 10:38 AUT.(01)");
             conector.Feed(1)
-            conector.EscribirTexto("Tara......: 15.000kg 07/02/2023 - 10:38 MAN.(03)");
+            conector.EscribirTexto("Tara......: "+data.tara.peso+"kg 07/02/2023 - 10:38 MAN.(03)");
             conector.Feed(1)
             conector.EscribirTexto("---------------------");
             conector.Feed(1)
-            conector.EscribirTexto("Neto......: 30.000kg 07/02/2023 - 10:38 OBS. ");
+            conector.EscribirTexto("Neto......: "+data.neto+"kg 07/02/2023 - 10:38 OBS. ");
             conector.Feed(2);
             conector.EstablecerTamFuente(1, 1);
             conector.EscribirTexto("------------------------------------------------\n");
@@ -432,9 +514,9 @@ export default {
             conector.EstablecerTamFuente(1, 1);
             conector.EstablecerAlineacion(ConectorPluginV3.ALINEACION_IZQUIERDA)
             conector.EscribirTexto("------------------------------------------------\n");
-            conector.EscribirTexto("Dominio Chasis: AA 456 GD\n");
-            conector.EscribirTexto("Dominio Acoplado: AA 456 GD\n");
-            conector.EscribirTexto("Dominio Chofer: Gimenez Fernando\n");
+            conector.EscribirTexto("Dominio Chasis..: "+data.chasis+"\n");
+            conector.EscribirTexto("Dominio Acoplado: "+data.acoplado+"\n");
+            conector.EscribirTexto("Datos del Chofer: "+data.chofer+"\n");
             conector.EscribirTexto("------------------------------------------------\n\n");
             conector.EscribirTexto("Condicion: Cotado\n");
             conector.EscribirTexto("------------------------------------------------\n");
@@ -461,6 +543,38 @@ export default {
                 alert("Error: " + respuesta);
             }
         },    
+    },
+    computed: {
+        showErrors() {
+            let formErrores=this.errores.join(" <---> ");
+            return formErrores;
+        },
+        checkModo(){
+            return this.getModo()
+        },
+        
+        validaPesoBruto()
+        {
+            if (parseInt(this.ticket.bruto.peso)>parseInt(this.ticket.tara.peso) 
+                && parseInt(this.ticket.bruto.peso)>=1000 && parseInt(this.ticket.bruto.peso)<=100000 )
+            {
+                return 1
+            }else{
+                return 0
+            } 
+        },
+        validaPesoTara()
+        {
+            if (parseInt(this.ticket.tara.peso)<parseInt(this.ticket.bruto.peso) 
+                && parseInt(this.ticket.tara.peso)>=1000)
+            {
+                return 1
+            }else{
+                return 0
+            } 
+        },
+
+        
     },    
 }
 </script>

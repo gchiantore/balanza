@@ -2,8 +2,8 @@
     <div class="col-12 header">
         <div class="header-top">
             <div class="logo-container">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/1/18/Ypf_logo.png" class="img-logo" alt="Logo YPF">
-                <h6 class="m-1">Oscar Chiantore SRL</h6>
+                <img :src="empresa[0].logo" class="img-logo" alt="Logo YPF">
+                <h6 class="m-1">{{ empresa[0].nombre }}</h6>
             </div>
         </div>
         <div class="header-bottom">
@@ -16,8 +16,17 @@
 </template>
 
 <script>
+import empre from "@/assets/json/empresa.json"
 export default {
-    name:'HeaderComponent'
+    name:'HeaderComponent',
+    data(){
+        return{
+            empresa:{}
+        }
+    },
+    created(){
+        this.empresa=empre
+    }
 }
 </script>
 

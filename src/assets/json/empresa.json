@@ -1,0 +1,15 @@
+[
+  {
+    "id":"1",
+    "nombre":"Oscar Chiantore SRL",
+    "cuit":"33-71147804-9",
+    "calle":"Ruta 17 km. 176",
+    "localidad":"La Para",
+    "provincia":"Cordoba",
+    "telefono":"3575-400209",
+    "email":"info@oscarchiantore.com.ar",
+    "logo":"https://upload.wikimedia.org/wikipedia/commons/1/18/Ypf_logo.png",
+    "precio":"1200",
+    "precioespecial":"900"
+  }
+]

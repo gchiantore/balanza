@@ -4,29 +4,23 @@
             <div class="container-fluid login-contenedor">
                 <div v-if="userList==1" class="row container">
                     <div class="user-list-container container">
-                        <div @click="activaPinUsuario()" class="avatar-container">
-                            <img src="https://i0.wp.com/satelitenorte.com.mx/wp-content/uploads/2020/07/personalidad.jpg?fit=1200%2C930&ssl=1" alt="Avatar">
-                            <h5>Sergio Gramaglia</h5>
+                        <div v-for="(op, i) of operadores" :key="i" @click="activaPinUsuario(op)" class="avatar-container">
+                            <img :src="op.avatar" :alt="op.nombre">
+                            <h6>{{op.nombre}}</h6>
                         </div>
-
-                        <div @click="activaPinUsuario()" class="avatar-container">
-                            <img src="https://i0.wp.com/satelitenorte.com.mx/wp-content/uploads/2020/07/personalidad.jpg?fit=1200%2C930&ssl=1" alt="Avatar">
-                            <h5>Sergio Gramaglia</h5>
-                        </div>
-
-                        <div @click="activaPinUsuario()" class="avatar-container">
-                            <img src="https://i0.wp.com/satelitenorte.com.mx/wp-content/uploads/2020/07/personalidad.jpg?fit=1200%2C930&ssl=1" alt="Avatar">
-                            <h5>Sergio Gramaglia</h5>
-                        </div>
-
                     </div>
                 </div>
                 <div v-else class="row d-flex justify-content-center align-items-center">
                     <div class="pin-container">
-                        <img src="https://i0.wp.com/satelitenorte.com.mx/wp-content/uploads/2020/07/personalidad.jpg?fit=1200%2C930&ssl=1" alt="Avatar">
-                        <h5>Sergio Gramaglia</h5>
+                        <div class="xcancelar">
+                            <p @click="canceloPin()" class="text-end fw-bold text-secondary" style="cursor:default;">X</p>
+                        </div>
+                        <img :src="opActivo.avatar" :alt="opActivo.nombre">
+                        <h5>{{opActivo.nombre}}</h5>
                         <div class="pin">
                             <VueChillCodeInput 
+                                id="PinCode"
+                                ref="PinCode"
                                 :length="4" 
                                 :autoFocus="true"
                                 :password="true"
@@ -58,9 +52,9 @@
         <div v-if="checkEstado==1" class="container-fluid contenedor-peso">
             <h3 class="titulo">{{buscoTitulo}}</h3>
             <div class="peso-manual">
-                <div v-if="errores.length!=0" class="alert alert-danger">
+                <!-- <div v-if="errores.length!=0" class="alert alert-danger">
                     {{showErrors}}
-                </div>
+                </div> -->
                 <form form id="pesoManuaFrm" action="" @submit.prevent="regValidate">
                     <div class="mb-3">
                         <label for="peso-manual" class="form-label">Peso Manual</label>
@@ -115,6 +109,7 @@
 </template>
 
 <script>
+import { db } from '@/firebaseDB';
 import pesodata from "@/assets/json/data.json"
 import VueChillCodeInput from 'vue-chill-code-input';
 import { mapGetters,mapMutations } from 'vuex'
@@ -134,30 +129,66 @@ export default {
                 tipo:'AUT',
                 tb:''
             },
+            operadores:[],
+            opActivo:Object,
             errores:[],
             loggedUser:1,
             userList:1,
             code:'0'
         }
     },
+    created(){
+        db.collection('usuarios').onSnapshot((snapshotChange) => {
+                this.Users = [];
+                snapshotChange.forEach((doc) => {
+                    this.operadores.push({
+                        key: doc.id,
+                        nombre: doc.data().nombre,
+                        pin:doc.data().pin,
+                        avatar: doc.data().avatar,
+                    })
+                });
+                console.log(this.operadores)
+            })
+            this.$vToastify.setSettings({
+                            position:"top-center",
+                            errorDuration:2000,
+                            hideProgressbar:true,
+                            theme:"dark",
+                        })
+    },
+
     methods:{
         ...mapGetters(['getEstado','getTitulo','getModo']),
         ...mapMutations(['setEstado','setTitulo','setModo']),
         ...mapMutations('pesoModule',['setPeso']),
 
         pinlleno(){
-            this.loggedUser=1
-            this.userList=1
-            if (this.getEstado()==1){
+            if (this.opActivo.pin==this.code){
+                this.loggedUser=1
+                this.userList=1
+                if (this.getEstado()==1){
+                    this.$nextTick(() => {
+                        console.log("pasa por aqui")
+                        this.$refs.pesoManual.focus(); 
+                        document.getElementById("peso-manual").select()
+                    });
+                }
+            }else{
+                this.$vToastify.error("El PIN es incorrecto!!")
+                this.code=""
                 this.$nextTick(() => {
-                    console.log("pasa por aqui")
-                    this.$refs.pesoManual.focus(); 
-                    document.getElementById("peso-manual").select()
-                });
+                        this.$refs.PinCode.focus(); 
+                    });
             }
         },
-
-        activaPinUsuario(){
+        canceloPin(){
+            this.setEstado(0)
+            this.loggedUser=1
+            this.userList=1  
+        },
+        activaPinUsuario(operador){
+            this.opActivo=operador
             this.userList=0
         },
         cambiaestado(valor,titulo,modo){
@@ -213,21 +244,31 @@ export default {
             }
 
             if(!this.tomaPeso.peso){
-                this.errores.push("El peso debe tener un valor");
+                this.$vToastify.error("El peso debe tener un valor")
+                this.$nextTick(() => {
+                        console.log("pasa por aqui")
+                        this.$refs.pesoManual.focus(); 
+                        document.getElementById("peso-manual").select()
+                    });
             }
 
             if(this.tomaPeso.peso<1000){
-                this.errores.push("El peso debe ser mayor o igual a 1.000");
-                console.log(this.errores)
+                this.$vToastify.error("El peso debe ser mayor o igual a 1.000")
+                this.$nextTick(() => {
+                        console.log("pasa por aqui")
+                        this.$refs.pesoManual.focus(); 
+                        document.getElementById("peso-manual").select()
+                    });
             }
             
             if(this.tomaPeso.peso>100000){
-                this.errores.push("El Peso debe ser menor a 100.000")
+                this.$vToastify.error("El Peso debe ser menor a 100.000")
+                this.$nextTick(() => {
+                        console.log("pasa por aqui")
+                        this.$refs.pesoManual.focus(); 
+                        document.getElementById("peso-manual").select()
+                    });
             } 
-            
-            setTimeout(() => {
-                this.errores=[];
-            }, 3000);
         },
     },
     computed: {
@@ -267,8 +308,12 @@ export default {
         align-items: center;
         row-gap: 20px;
     }
+    .xcancelar{
+        width: 100%;
+        padding: 4px;
+    }
     .pin-container img{
-        margin-top: 50px;
+        margin-top: 5px;
         width: 150px;
         height: 150px;
         border-radius: 50%;
@@ -282,13 +327,13 @@ export default {
         align-items: center;
         row-gap: 10px;
     }
-    .avatar-container h5{
+    .avatar-container h6{
         color: gray;
     }
     .avatar-container:hover img{
         box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     }
-    .avatar-container:hover h5{
+    .avatar-container:hover h6{
         font-weight: bold;
         color:green;
     }

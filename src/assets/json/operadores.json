@@ -1,0 +1,39 @@
+[
+    {
+        "id":"1",
+        "nombre":"Gramaglia Sergio",
+        "pin":"1234",
+        "avatar":"https://static.eldiario.es/clip/d36c4f1d-a9c9-4885-9749-de712a5afb2b_source-aspect-ratio_default_1060633.jpg"
+    },
+    {
+        "id":"2",
+        "nombre":"Brochero Franco",
+        "pin":"1234",
+        "avatar":"https://static.eldiario.es/clip/024cc731-73d1-4148-b711-57ce84ff8423_source-aspect-ratio_default_1060638.jpg"
+        },
+    {
+        "id":"3",
+        "nombre":"Gramaglia Ruben",
+        "pin":"1234",
+        "avatar":"https://static.eldiario.es/clip/aa2be1d8-69da-432a-b7a5-8aa37cc8dfe4_source-aspect-ratio_default_1060648.jpg"
+        },    
+    {
+        "id":"4",
+        "nombre":"Guillermo Caffarena",
+        "pin":"1234",
+        "avatar":"https://static.eldiario.es/clip/2060503a-4fc4-49b1-a95a-b92cd00dc8f0_source-aspect-ratio_default_1060655.jpg"
+        },
+    {
+        "id":"5",
+        "nombre":"Depiante Patricio",
+        "pin":"1234",
+        "avatar":"https://static.eldiario.es/clip/a9d8ac46-1089-49d2-8aac-8940c140e37a_source-aspect-ratio_default_1060653.jpg"
+        },
+    {
+        "id":"6",
+        "nombre":"Lucarelli Julian",
+        "pin":"1234",
+        "avatar":"https://static.eldiario.es/clip/5b2ee44a-bc4e-49d0-ace7-f5b543e353c8_source-aspect-ratio_default_1060657.jpg"
+        }
+            
+]
