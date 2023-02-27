@@ -5,6 +5,9 @@
                 <img :src="empresa[0].logo" class="img-logo" alt="Logo YPF">
                 <h6 class="m-1">{{ empresa[0].nombre }}</h6>
             </div>
+            <div class="turno">
+                <h6>{{ hayTurno }}</h6>
+            </div>
         </div>
         <div class="header-bottom">
             <nav>
@@ -16,6 +19,7 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations } from 'vuex';
 import empre from "@/assets/json/empresa.json"
 export default {
     name:'HeaderComponent',
@@ -26,6 +30,19 @@ export default {
     },
     created(){
         this.empresa=empre
+        console.log(empre)
+
+    },
+    methods:{
+        ...mapGetters('turnosModule',['getTurnoActual']),
+        ...mapMutations('trunosModule',['setTurnoActual']),
+        ...mapGetters('empresaModule',['getEmpresa']),
+        ...mapMutations('empresaModule',['setEmpresa'])
+    },
+    computed:{
+        hayTurno(){
+            return this.getTurnoActual().nombre
+        }
     }
 }
 </script>

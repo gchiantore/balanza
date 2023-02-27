@@ -12,9 +12,9 @@
                         <div class="row m-3">
                             <div class="col-12 col-md-7">
                                 <p class="m-0">Ticket : Nuevo </p>
-                                <p class="m-0">Operador : (3)- Guillermo Chaintore</p>
-                                <p class="m-0">Fecha: 14/02/2023</p>
-                                <p class="m-0">Hora: 19:35</p>
+                                <p class="m-0">Operador : ({{ticket.opcreador.id}})- {{ticket.opcreador.nombre}}</p>
+                                <p class="m-0">Fecha: {{ new Date().toLocaleDateString()}}</p>
+                                <p class="m-0">Hora: {{ new Date().toLocaleTimeString()}}</p>
                                 <div class="row m-2">
                                     <div class="form-check col-12 col-md-6">
                                         <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
@@ -39,7 +39,7 @@
 
                                     <div v-if="estadoBruto==1" class="d-flex flex-row gap-1">
                                         <label for="bruto" class="form-label m-2" style="width:100px">Bruto</label>
-                                        <input ref="bruto" v-model="ticket.bruto.peso" type="text" class="form-control text-end" id="bruto" value="" disabled>
+                                        <input ref="bruto" v-model="bruto" type="text" class="form-control text-end" id="bruto" value="" disabled>
                                         <button @click="cambiaEstadoBoton('B',2)" type="button" class="btn btn-info">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
@@ -47,7 +47,7 @@
 
                                     <div v-else-if="estadoBruto==2" class="d-flex flex-row gap-1">
                                         <label for="bruto" class="form-label m-2" style="width:100px">Bruto</label>
-                                        <input ref="bruto" v-model="ticket.bruto.peso" type="text" class="form-control text-end" id="bruto" value="">
+                                        <input ref="bruto" v-model="bruto" type="text" class="form-control text-end" id="bruto" value="">
                                         <div v-if="validaPesoBruto==1">
                                             <button @click="cambiaEstadoBoton('B',3)" type="button" class="btn btn-success">
                                                 <i class="bi bi-check-all"></i>
@@ -62,7 +62,7 @@
 
                                     <div v-else class="d-flex flex-row gap-1">
                                         <label for="bruto" class="form-label m-2" style="width:100px">Bruto</label>
-                                        <input ref="bruto" v-model="ticket.bruto.peso" type="text" class="form-control text-end" id="bruto" value="" disabled>
+                                        <input ref="bruto" v-model="bruto" type="text" class="form-control text-end" id="bruto" value="" disabled>
                                         <button type="button" class="btn btn-info" disabled data-bs-toggle="button" >
                                             <i class="bi bi-pencil-square"></i>
                                         </button>   
@@ -74,7 +74,7 @@
                                     
                                     <div v-if="estadoTara==1" class="d-flex flex-row gap-1">
                                         <label for="tara" class="form-label m-2" style="width:100px">Tara</label>
-                                        <input ref="tara" v-model="ticket.tara.peso" type="text" class="form-control text-end" id="tara" value="" disabled>
+                                        <input ref="tara" v-model="tara" type="text" class="form-control text-end" id="tara" value="" disabled>
                                         <button @click="cambiaEstadoBoton('T',2)" type="button" class="btn btn-info">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
@@ -82,7 +82,7 @@
 
                                     <div v-else-if="estadoTara==2" class="d-flex flex-row gap-1">
                                         <label for="tara" class="form-label m-2" style="width:100px">Tara</label>
-                                        <input ref="tara" v-model="ticket.tara.peso" type="text" class="form-control text-end" id="tara" value="">
+                                        <input ref="tara" v-model="tara" type="text" class="form-control text-end" id="tara" value="">
                                         <div v-if="validaPesoTara==1">
                                             <button @click="cambiaEstadoBoton('T',3)" type="button" class="btn btn-success">
                                                 <i class="bi bi-check-all"></i>
@@ -97,7 +97,7 @@
 
                                     <div v-else class="d-flex flex-row gap-1">
                                         <label for="tara" class="form-label m-2" style="width:100px">Tara</label>
-                                        <input ref="tara" v-model="ticket.tara.peso" type="text" class="form-control text-end" id="tara" value="" disabled>
+                                        <input ref="tara" v-model="tara" type="text" class="form-control text-end" id="tara" value="" disabled>
                                         <button type="button" class="btn btn-info" disabled data-bs-toggle="button" >
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
@@ -151,6 +151,12 @@
         </div>
         <div v-else>
             <h1>Hola Mundo</h1>
+            <br>
+            <h4>Turno: {{ turnoActivo.nombre }}</h4>
+            <h4>Abierto: {{ turnoActivo.apertura }}</h4>
+            <h4>Planilla Debo: {{ turnoActivo.planilla }}</h4>
+            <br>
+            <button @click="cerrarTurno()" class="btn btn-danger">Cerrar Turno {{ turnoActivo.nombre }}</button>
         </div>    
     </div>
 </template>
@@ -167,49 +173,30 @@ export default {
     
     data() {
         return {
+            bruto:0,
+            tara:0,
             ticket:{
                 idticket:0,
-                operador:{
-                    op:'',
-                    nombre:'',
-                },
+                fecha:'',
+                hora:'',
+                turnoinicio:Object,
+                turnofin:Object,
+                opcreador:Object,
                 origen:'',
                 destino:'',
                 producto:'',
                 chasis:'',
                 acoplado:'',
                 chofer:'',
-                bruto:{
-                    peso:0,
-                    op:'',
-                    opNombre:'',
-                    fecha:'',
-                    hora:'',
-                    tipo:'AUT',
-                    tb:'B'
-                },
-                tara:{
-                    peso:0,
-                    op:'',
-                    opNombre:'',
-                    fecha:'',
-                    hora:'',
-                    tipo:'AUT',
-                    tb:'T'
-                },
+                bruto:Object,
+                tara:Object,
                 neto:0,
                 contado:true,
-                importe:0
+                importe:0,
+                pendiente:true,
+                empresa:Object
             },
-            producto:Object,
-            objproducto:{
-                id:'',
-                name:'',
-                desc:'',
-                precio:0,
-                activo:false,
-            },
-            listaproducto:Object,
+            turnoActivo:Object,
             estadoBruto:1,
             estadoTara:1,
             errores:[],
@@ -217,6 +204,8 @@ export default {
         }
     },    
     created(){
+        this.turnoActivo=this.getTurnoActual()
+        this.ticket=this.getTicket()
         if(this.getPeso().tb=="T"){
             this.ticket.tara=this.getPeso()
             this.ticket.bruto.peso=0
@@ -229,6 +218,7 @@ export default {
             this.estadoTara=1
             this.estadoBruto=3
         }
+        this.setTicket(this.ticket)
         this.$vToastify.setSettings({
                             position:"top-center",
                             errorDuration:2000,
@@ -236,15 +226,24 @@ export default {
                             theme:"dark",
                         })
     },
+    beforeUpdate(){
+        this.turnoActivo=this.getTurnoActual()
+    },
     updated(){
-        console.log(this.getPeso().tb)
         if(this.getPeso().tb=="T"){
+            this.ticket=this.getTicket()
             this.ticket.tara=this.getPeso()
+            this.tara=this.ticket.tara.peso
             this.estadoTara=3
+            this.setOperadorTicket(this.getOpTicket(),"T")
+
         }
         if(this.getPeso().tb=="B"){
+            this.ticket=this.getTicket()
             this.ticket.bruto=this.getPeso()
+            this.bruto=this.ticket.bruto.peso
             this.estadoBruto=3
+            this.setOperadorTicket(this.getOpTicket(),"B")
         }
     },
 
@@ -253,6 +252,25 @@ export default {
         ...mapGetters('pesoModule',['getPeso']),
         ...mapMutations(['setEstado','setTitulo','setModo']),
         ...mapMutations('pesoModule',['setPeso']),
+        ...mapGetters('turnosModule',['getTurnoActual','getEstadoTurno']),
+        ...mapMutations('turnosModule',['setTurnoActual']),
+        ...mapGetters('ticketModule',['getTicket']),
+        ...mapMutations('ticketModule',['setTicket','setOperadorTicket']),
+        ...mapGetters('operadorModule',['getOpTicket']),
+        ...mapMutations('operadorModule',['setOpTicket']),
+
+        cerrarTurno(){
+            this.turnoActivo.nombre=''
+            this.turnoActivo.apertura=''
+            this.turnoActivo.planilla=''
+            this.turnoActivo.estado="C"
+            this.turnoActivo.ctacte=0
+            this.turnoActivo.ctdo=0
+            this.turnoActivo.qpesadas=0
+            this.turnoActivo.qpendientes=0
+            this.setTurnoActual(this.turnoActivo)
+            localStorage.removeItem('turnoActv')
+        },
         validaCampo(campo){
             let valorCampo=""
             switch(campo){
@@ -362,11 +380,18 @@ export default {
             if(boton=='B'){
                 this.estadoBruto=valor
                 if (valor==2){
+                    this.bruto=0
                     this.$nextTick(() => {
                         this.$refs.bruto.focus(); 
                         document.getElementById("bruto").select()
                     });
                 }else if (valor==3){
+                    this.ticket.bruto.peso=this.bruto
+                    this.ticket.bruto.fecha=new Date().toLocaleDateString()
+                    this.ticket.bruto.hora=new Date().toLocaleTimeString()
+                    this.ticket.bruto.tipo="MAN"
+                    this.ticket.bruto.tb="B"
+                    this.ticket.bruto.op=this.getOpTicket()
                     this.$nextTick(() => {
                         this.$refs.origen.focus(); 
                         document.getElementById("origen").select()
@@ -375,11 +400,18 @@ export default {
             }else{
                 this.estadoTara=valor
                 if (valor==2){
+                this.ticket.tara.peso=0    
                 this.$nextTick(() => {
                         this.$refs.tara.focus(); 
                         document.getElementById("tara").select()
                     });
                 }else if (valor==3){
+                    this.ticket.tara.peso=this.bruto
+                    this.ticket.tara.fecha=new Date().toLocaleDateString()
+                    this.ticket.tara.hora=new Date().toLocaleTimeString()
+                    this.ticket.tara.tipo="MAN"
+                    this.ticket.tara.tb="B"
+                    this.ticket.tara.op=this.getOpTicket()
                     this.$nextTick(() => {
                         this.$refs.origen.focus(); 
                         document.getElementById("origen").select()
@@ -399,11 +431,11 @@ export default {
         },
 
         calculoNeto(){
-            this.ticket.neto=this.ticket.bruto.peso-this.ticket.tara.peso
+            this.ticket.neto=parseInt(this.ticket.bruto.peso)-parseInt(this.ticket.tara.peso)
         },
 
         formValidate() {
-            if(this.objproducto.name && this.objproducto.desc && this.objproducto.precio){
+            /* if(this.objproducto.name && this.objproducto.desc && this.objproducto.precio){
                 if(this.modo==2){
                         this.putProductosApi(this.objproducto)
                         this.$swal.fire({
@@ -440,13 +472,16 @@ export default {
             } 
             setTimeout(() => {
                 this.errores=[];
-            }, 3000);
+            }, 3000); */
         },
         btnCancelar(){
             this.$emit('enviar',false)
         },
 
         guardarEimprimir(){
+            console.log("listo para guardar")
+            /* Aqui falta poner el turno de fin del ticket y buscar el numero siguiente de ticket*/
+            console.log(this.ticket)
             const URLPlugin = "http://localhost:8000"
             const nombreImpresora ="EPSON TM-T20II Receipt" /* $listaDeImpresoras.value; */
             this.imprimirTicket(nombreImpresora, URLPlugin,this.ticket)
@@ -498,13 +533,13 @@ export default {
             conector.EstablecerAlineacion(ConectorPluginV3.ALINEACION_IZQUIERDA)
             conector.EscribirTexto("------------------------------------------------\n\n");
             conector.EstablecerTamFuente(1, 1);
-            conector.EscribirTexto("Bruto.....: "+data.bruto.peso+"kg 07/02/2023 - 10:38 AUT.(01)");
+            conector.EscribirTexto("Bruto..: "+data.bruto.peso+"kg "+data.bruto.fecha+" - " + data.bruto.hora+" "+ data.bruto.tipo+". ("+data.bruto.op.id+")");
             conector.Feed(1)
-            conector.EscribirTexto("Tara......: "+data.tara.peso+"kg 07/02/2023 - 10:38 MAN.(03)");
+            conector.EscribirTexto("Tara...: "+data.tara.peso+"kg " +data.tara.fecha+" - " + data.tara.hora+" "+ data.tara.tipo+". ("+data.tara.op.id+")");
             conector.Feed(1)
             conector.EscribirTexto("---------------------");
             conector.Feed(1)
-            conector.EscribirTexto("Neto......: "+data.neto+"kg 07/02/2023 - 10:38 OBS. ");
+            conector.EscribirTexto("Neto......: "+data.neto+"kg");
             conector.Feed(2);
             conector.EstablecerTamFuente(1, 1);
             conector.EscribirTexto("------------------------------------------------\n");
@@ -555,18 +590,21 @@ export default {
         
         validaPesoBruto()
         {
-            if (parseInt(this.ticket.bruto.peso)>parseInt(this.ticket.tara.peso) 
-                && parseInt(this.ticket.bruto.peso)>=1000 && parseInt(this.ticket.bruto.peso)<=100000 )
+            console.log("Entra a Validar")
+            if (parseInt(this.bruto)>parseInt(this.ticket.tara.peso) 
+                && parseInt(this.bruto)>=1000 && parseInt(this.bruto))
             {
+                console.log("Devuelve 1")
                 return 1
             }else{
+                console.log("devuelve 0")
                 return 0
             } 
         },
         validaPesoTara()
         {
-            if (parseInt(this.ticket.tara.peso)<parseInt(this.ticket.bruto.peso) 
-                && parseInt(this.ticket.tara.peso)>=1000)
+            if (parseInt(this.tara)<parseInt(this.ticket.bruto.peso) 
+                && parseInt(this.tara)>=1000)
             {
                 return 1
             }else{

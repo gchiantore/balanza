@@ -1,1 +1,20 @@
 12345678
+
+consulta en query en firebaseDB
+
+import { db } from '@/firebaseDB';
+import { collection, query, where, getDocs } from "firebase/firestore";
+
+
+async created(){
+          const userRef = collection(db, "movimientosturnos");
+          const q = query(userRef, where("estado", "==", "A"))
+          const querySnapshot = await getDocs(q);
+            querySnapshot.forEach((doc) => {
+              // doc.data() is never undefined for query doc snapshots
+              this.turnoAbierto=doc.data().turno
+              console.log(doc.data().turno)
+              console.log(this.turnoAbierto)
+            });
+              this.setTurnoActual(this.turnoAbierto)
+        },

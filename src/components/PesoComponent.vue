@@ -62,7 +62,7 @@
                         <div id="pm-help" class="form-text">ingrese numeros enteros del 1000 al 100000</div>
                     </div>
                     <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                        <button type="submit" class="btn btn-primary">OK!</button>
+                        <button type="submit" class="btn btn-primary col-12">OK!</button>
                     </div>
                 </form>
             </div>
@@ -73,7 +73,7 @@
             <div class="peso-fijado">
                 <div class="peso-info">
                     <h2 class="peso-fijado-texto text-center">{{ tomaPeso.peso }} kg.</h2>
-                    <h6 class="datos-peso text-center">{{tomaPeso.tipo}} - {{ tomaPeso.fecha}} - {{tomaPeso.hora}} - OP:{{tomaPeso.op}}</h6>
+                    <h6 class="datos-peso text-center">{{tomaPeso.tipo}} - {{ tomaPeso.fecha}} - {{tomaPeso.hora}} - OP: {{operador.nombre}}</h6>
                 </div>
                 <div class="d-felx gap-2 d-md-flex justify-content-md-center ">
                     <button @click="fijoTara()" class="btn btn-primary col-4">Tara</button>
@@ -120,10 +120,30 @@ export default {
     },
     data(){
         return{
+            ticket:{
+                idticket:0,
+                fecha:'',
+                hora:'',
+                turnoinicio:Object,
+                turnofin:Object,
+                opcreador:Object,
+                origen:'',
+                destino:'',
+                producto:'',
+                chasis:'',
+                acoplado:'',
+                chofer:'',
+                bruto:Object,
+                tara:Object,
+                neto:0,
+                contado:true,
+                importe:0,
+                pendiente:true,
+                empresa:Object
+            },
             tomaPeso:{
                 peso:0,
-                op:'',
-                opNombre:'',
+                op:{},
                 fecha:'',
                 hora:'',
                 tipo:'AUT',
@@ -131,6 +151,10 @@ export default {
             },
             operadores:[],
             opActivo:Object,
+            opTicket:{
+                id:'',
+                nombre:''
+            },
             errores:[],
             loggedUser:1,
             userList:1,
@@ -146,9 +170,9 @@ export default {
                         nombre: doc.data().nombre,
                         pin:doc.data().pin,
                         avatar: doc.data().avatar,
+                        cdodebo: doc.data().cdodebo,
                     })
                 });
-                console.log(this.operadores)
             })
             this.$vToastify.setSettings({
                             position:"top-center",
@@ -162,14 +186,23 @@ export default {
         ...mapGetters(['getEstado','getTitulo','getModo']),
         ...mapMutations(['setEstado','setTitulo','setModo']),
         ...mapMutations('pesoModule',['setPeso']),
+        ...mapGetters('operadorModule',['getOpTicket']),
+        ...mapMutations('operadorModule',['setOpTicket']),
+        ...mapGetters('ticketModule',['getTicket']),
+        ...mapMutations('ticketModule',['setTicket']),
+        ...mapGetters('empresaModule',['getEmpresa']),
+        ...mapGetters('turnosModule',['getTurnoActual']),
 
         pinlleno(){
             if (this.opActivo.pin==this.code){
                 this.loggedUser=1
                 this.userList=1
+                this.opTicket.nombre=this.opActivo.nombre
+                this.opTicket.id=this.opActivo.cdodebo
+                this.opTicket.avatar=this.opActivo.avatar
+                this.setOpTicket(this.opTicket)
                 if (this.getEstado()==1){
                     this.$nextTick(() => {
-                        console.log("pasa por aqui")
                         this.$refs.pesoManual.focus(); 
                         document.getElementById("peso-manual").select()
                     });
@@ -198,6 +231,15 @@ export default {
         },
         nuevoTk(){
             this.setPeso(this.tomaPeso)
+            this.ticket.fecha=new Date().toLocaleDateString()
+            this.ticket.hora=new Date().toLocaleTimeString()
+            this.ticket.opcreador=this.getOpTicket()
+            this.ticket.empresa=this.getEmpresa()
+            this.ticket.importe=this.ticket.empresa[0].precio
+            this.ticket.turnoinicio=this.getTurnoActual()
+            this.ticket.contado=true
+            this.ticket.pendiente=true
+            this.setTicket(this.ticket)
             this.setModo(1)
             
         },
@@ -217,14 +259,14 @@ export default {
         },
 
         tomarPesoBalanza(){
-            this.tomaPeso.peso=pesodata[0].data
             this.setEstado(2)
             this.setTitulo("Peso Fijado Automaticamente")
-            this.tomaPeso.op=1
-            this.tomaPeso.fecha="11/02/2023"
-            this.tomaPeso.hora="10:38"
-            this.tomaPeso.tipo="AUT"
             this.loggedUser=0
+            this.tomaPeso.peso=pesodata[0].data
+            this.tomaPeso.op=this.getOpTicket()
+            this.tomaPeso.fecha=new Date().toLocaleDateString()
+            this.tomaPeso.hora=new Date().toLocaleTimeString()
+            this.tomaPeso.tipo="AUT"
         },
 
         tomarPesoManual(){
@@ -237,16 +279,15 @@ export default {
             if(this.tomaPeso.peso>=1000 && this.tomaPeso.peso<=100000){
                 this.setEstado(2)
                 this.setTitulo("Peso Fijado Manualmente")
-                this.tomaPeso.op=1
-                this.tomaPeso.fecha="11/02/2023"
-                this.tomaPeso.hora="10:38"
+                this.tomaPeso.op=this.getOpTicket()
+                this.tomaPeso.fecha=new Date().toLocaleDateString()
+                this.tomaPeso.hora=new Date().toLocaleTimeString()
                 this.tomaPeso.tipo="MAN"
             }
 
             if(!this.tomaPeso.peso){
                 this.$vToastify.error("El peso debe tener un valor")
                 this.$nextTick(() => {
-                        console.log("pasa por aqui")
                         this.$refs.pesoManual.focus(); 
                         document.getElementById("peso-manual").select()
                     });
@@ -255,7 +296,6 @@ export default {
             if(this.tomaPeso.peso<1000){
                 this.$vToastify.error("El peso debe ser mayor o igual a 1.000")
                 this.$nextTick(() => {
-                        console.log("pasa por aqui")
                         this.$refs.pesoManual.focus(); 
                         document.getElementById("peso-manual").select()
                     });
@@ -264,7 +304,6 @@ export default {
             if(this.tomaPeso.peso>100000){
                 this.$vToastify.error("El Peso debe ser menor a 100.000")
                 this.$nextTick(() => {
-                        console.log("pasa por aqui")
                         this.$refs.pesoManual.focus(); 
                         document.getElementById("peso-manual").select()
                     });
@@ -287,7 +326,10 @@ export default {
         },
         checkModo(){
             return this.getModo()
-        }
+        },
+        operador(){
+            return this.getOpTicket()
+        },
     }
 }
 </script>

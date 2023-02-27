@@ -3,6 +3,8 @@ import Vuex from 'vuex'
 import operadorModule from '@/store/modules/operador'
 import pesoModule from '@/store/modules/peso'
 import ticketModule from '@/store/modules/ticket'
+import turnosModule from '@/store/modules/turnos'
+import empresaModule from '@/store/modules/empresa'
 
 Vue.use(Vuex)
 
@@ -38,6 +40,8 @@ export default new Vuex.Store({
       operadorModule,
       pesoModule,
       ticketModule,
+      turnosModule,
+      empresaModule,
     },
 }) 
 
